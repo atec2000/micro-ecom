@@ -1,0 +1,51 @@
+server:
+  port: 10081
+
+spring:
+  application:
+    name: catalog-command
+  rabbitmq:
+    host: rabbit
+    username: guest
+    password: guest
+  data:
+    mongodb:
+      host: catalog-mongodb
+      port: 27017
+      database: catalog
+  cloud:
+    stream:
+      default:
+        contentType: application/json
+      bindings:
+        productsCreatedChannel:
+          destination: productsCreatedExchange
+        productsUpdatedChannel:
+          destination: productsUpdatedExchange
+        orderCreatedChannel:
+          destination: orderCreatedExchange
+          group: orderCreatedQueryGroup
+      rabbit:
+        bindings:
+          orderCreatedChannel:
+            consumer:
+              autoBindDlq: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+logging:
+  file: catalog-command.log
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.microecom: DEBUG
+    
+info:
+  app:
+    name: mec - catalog-command
+    description: mec - catalog-command

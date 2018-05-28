@@ -1,0 +1,132 @@
+version: "2"
+
+services:
+
+  discovery:
+    container_name: discovery
+    image: atec2000/mec-discovery-eureka
+    ports:
+     - "8761:8761"
+#    environment:
+#     - spring.profiles.active=peer1
+
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:3.7-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq:/etc/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_NODENAME: rabbit
+
+  catalog-mongodb:
+    container_name: catalog-mongodb
+    image: mongo:3.6
+    ports:
+     - "27017:27017"
+     - "28017:28017"
+
+  catalog-command:
+    container_name: catalog-command
+    image: atec2000/mec-catalog-command
+    ports:
+     - "10081:10081"
+    depends_on:
+     - discovery
+     - rabbit
+     - catalog-mongodb
+
+  catalog-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+#    image: elasticsearch:5.6
+#    image: elasticsearch:2.4
+    container_name: catalog-elasticsearch
+    environment:
+      - cluster.name=elasticsearch
+    ports:
+     - "9200:9200"
+     - "9300:9300"
+
+  catalog-query:
+    container_name: catalog-query
+    image: atec2000/mec-catalog-query
+    ports:
+     - "10091:10091"
+    depends_on:
+     - discovery
+     - rabbit
+     - catalog-elasticsearch
+
+  order-mysql:
+    container_name: order-mysql
+    image: mysql/mysql-server:5.6
+    ports:
+     - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=order
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - ../order-command/src/main/resources/initdata:/var/lib/mysql/initdata
+      - ../order-command/src/main/resources/initdata/schema.sql:/var/lib/mysql/initdata/schema.sql
+
+  order-command:
+    container_name: order-command
+    image: atec2000/mec-order-command
+    ports:
+     - "10061:10061"
+     - "20061:20061"
+    depends_on:
+     - discovery
+     - rabbit
+     - order-mysql
+
+#  inventory-elasticsearch:
+#    #image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+#    image: elasticsearch:2.4
+#    container_name: inventory-elasticsearch
+#    environment:
+#      - cluster.name=elasticsearch
+#    ports:
+#     - "9200:9200"
+#     - "9300:9300"
+#
+#  inventory-query:
+#    container_name: inventory-query
+#    image: spabbitecomm/inventory-query
+#    ports:
+#     - "7001:7001"
+#    depends_on:
+#     - my-rabbit
+#     - inventory-elasticsearch
+#
+#  order-mysql:
+#    container_name: order-mysql
+#    image: mysql/mysql-server:5.6
+#    ports:
+#     - "3306:3306"
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=root
+#      - MYSQL_DATABASE=order
+#      - MYSQL_ROOT_HOST=%
+#
+#  order-command:
+#    container_name: order-command
+#    image: spabbitecomm/order-command
+#    ports:
+#     - "7050:7050"
+#    depends_on:
+#     - my-rabbit
+#     - order-mysql
+#
+#  order-cron:
+#    container_name: order-cron
+#    image: spabbitecomm/order-cron
+#    depends_on:
+#     - my-rabbit
+#     - order-mysql

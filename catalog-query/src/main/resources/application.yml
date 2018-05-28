@@ -1,0 +1,49 @@
+server:
+  port: 10091
+
+spring:
+  application:
+    name: catalog-query
+  rabbitmq:
+    host: rabbit
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      bindings:
+        productsCreatedChannel:
+          destination: productsCreatedExchange
+          group: productsCreatedQueryGroup
+        productsUpdatedChannel:
+          destination: productsUpdatedExchange
+          group: productsUpdatedQueryGroup
+      rabbit:
+        bindings:
+          productsCreatedChannel:
+            consumer:
+              autoBindDlq: true
+          productsUpdatedChannel:
+            consumer:
+              autoBindDlq: true
+  data:
+    elasticsearch:
+      cluster-nodes: catalog-elasticsearch:9300
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+logging:
+  file: catalog-query.log
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.microecom: DEBUG
+    
+info:
+  app:
+    name: mec - catalog-query
+    description: mec - catalog-query

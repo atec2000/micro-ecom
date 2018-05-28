@@ -1,0 +1,62 @@
+server:
+  port: 10061
+
+spring:
+  application:
+    name: order-command
+  rabbitmq:
+    host: rabbit
+    username: guest
+    password: guest
+  datasource:
+    url: jdbc:mysql://order-mysql:3306/order
+    driverClassName: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    validation-query: SELECT 1
+#    initialization-mode: always
+#    type: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#spring.jpa.hibernate.ddl-auto=none
+#spring.datasource.initialization-mode=always
+#  initdata:
+#    url: jdbc:mysql://order-mysql:3306/order
+#    driverClassName: com.mysql.jdbc.Driver
+#    username: root
+#    password: root
+#    validation-query: SELECT 1
+  cloud:
+    stream:
+      default:
+        contentType: application/json
+      bindings:
+        orderCreatedChannel:
+          destination: orderCreatedExchange
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+feign:
+  hystrix:
+    enabled: true
+
+logging:
+  file: order-command.log
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.microecom: DEBUG
+    
+info:
+  app:
+    name: mec - order-command
+    description: mec - orer-command
