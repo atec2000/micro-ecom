@@ -11,7 +11,7 @@ Add maven settings.xm file with following docker hub authentication information 
     <server>
       <id>docker-hub</id>
       <username>atec2000</username>
-      <password>Shenzhen16</password>
+      <password>....16</password>
       <configuration>
         <email>atec2000@gmail.com</email>
       </configuration>
